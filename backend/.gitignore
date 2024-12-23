@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Ambiente virtual
+env/
+venv/
+*.env
+
+# Cache e logs
+*.log
+*.sqlite3
+*.db
+*.pkl
+*.pid
+
+# Configurações locais e IDEs
+*.vscode/
+.idea/
+.DS_Store
+
+# Pytest e cobertura de código
+.coverage
+htmlcov/
+.cache/
+pytest_cache/
+*.pytest_cache/
+
+# Docker
+*.env
+.env
+docker-compose.override.yml
+
+# Outros
+*.swp
+*.swo
