@@ -1,7 +1,12 @@
+import os
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app import models
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-from jose import JWTError, jwt
-import os
 
 # Contexto para hash de senhas com o Passlib
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -16,6 +21,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica se a senha em texto puro corresponde ao hash armazenado."""
     return pwd_context.verify(plain_password, hashed_password)
 
+# Esquema OAuth2 para obter o token do cabeçalho Authorization
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 # Configurações do JWT
 SECRET_KEY = os.getenv("SECRET_KEY", "supersecretkey")  # Use uma chave secreta forte
@@ -47,3 +54,35 @@ def verify_token(token: str):
         return payload  # Retorna o conteúdo do payload
     except JWTError:
         return None  # Se o token for inválido ou expirado
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """Verifica e decodifica o token JWT, e retorna o usuário atual."""
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Não foi possível validar as credenciais",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if user is None:
+        raise credentials_exception
+    return user
+
+def get_current_active_user(current_user: models.User = Depends(get_current_user)):
+    """Verifica se o usuário tem o papel de 'user' e retorna o usuário ativo."""
+    if current_user.role != "user":
+        raise HTTPException(status_code=403, detail="Ação não permitida para este papel")
+    return current_user
+
+def get_current_active_admin(current_user: models.User = Depends(get_current_user)):
+    """Verifica se o usuário tem o papel de 'admin' e retorna o usuário ativo."""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Ação não permitida para administradores")
+    return current_user
