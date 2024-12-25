@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import user
+from app.routers import user, auth, material
 from app.database import Base, engine
 
 
@@ -10,6 +10,8 @@ app = FastAPI()
 
 # Registrar rotas
 app.include_router(user.router)
+app.include_router(auth.router)
+app.include_router(material.router)
 
 @app.get("/")
 def root():
