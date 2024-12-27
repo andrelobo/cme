@@ -54,6 +54,11 @@ VITE_API_URL=http://localhost:8000
 
 2. **Acessar a aplicação:**
    - **Frontend**: [http://localhost:5173](http://localhost:5173)
+
+                  login inicial :
+                  email: admin@cme.com
+                  senha: admin123
+
    - **Backend (documentação da API)**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
