@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app import models, schemas
 from app.database import get_db
+from app.utils import get_current_active_user, get_current_active_admin
 
 router = APIRouter(prefix="/materials", tags=["materials"])
 
-
-# Criar um novo material
+# Criar um novo material (Somente administradores)
 @router.post("/", response_model=schemas.MaterialOut)
-def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_db)):
+def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_admin)):
     # Gerar serial único com base no nome do material
     serial = f"{material.name[:5].upper()}-{db.query(models.Material).count() + 1:03}"
     
@@ -24,20 +24,19 @@ def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_
     db.refresh(new_material)
     return new_material
 
-
-# Obter todos os materiais
+# Obter todos os materiais (Somente usuários autenticados)
 @router.get("/", response_model=list[schemas.MaterialOut])
-def get_all_materials(db: Session = Depends(get_db)):
+def get_all_materials(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
     materials = db.query(models.Material).all()
     return materials
 
-
-# Adicionar rastreamento a um material
+# Adicionar rastreamento a um material (Somente administradores)
 @router.post("/{material_id}/tracking", response_model=schemas.MaterialTrackingOut)
 def add_tracking(
     material_id: int,
     tracking: schemas.MaterialTrackingCreate,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_admin)
 ):
     # Verificar se o material existe
     material = db.query(models.Material).filter(models.Material.id == material_id).first()
@@ -56,19 +55,17 @@ def add_tracking(
     db.refresh(new_tracking)
     return new_tracking
 
-
-# Obter rastreamento de um material
+# Obter rastreamento de um material (Somente usuários autenticados)
 @router.get("/{material_id}/tracking", response_model=list[schemas.MaterialTrackingOut])
-def get_tracking(material_id: int, db: Session = Depends(get_db)):
+def get_tracking(material_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
     material = db.query(models.Material).filter(models.Material.id == material_id).first()
     if not material:
         raise HTTPException(status_code=404, detail="Material não encontrado.")
     return material.tracking_records
 
-
-# Obter informações detalhadas de um material
+# Obter informações detalhadas de um material (Somente usuários autenticados)
 @router.get("/{material_id}", response_model=schemas.MaterialOut)
-def get_material(material_id: int, db: Session = Depends(get_db)):
+def get_material(material_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_active_user)):
     material = db.query(models.Material).filter(models.Material.id == material_id).first()
     if not material:
         raise HTTPException(status_code=404, detail="Material não encontrado.")

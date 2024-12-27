@@ -42,11 +42,16 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 # Função para verificar e decodificar o token JWT
 def verify_token(token: str):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Token inválido ou expirado.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError:
-        return None
+        raise credentials_exception
 
 # Função para buscar um usuário pelo email
 def get_user_by_email(db: Session, email: str):
@@ -90,14 +95,14 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
     return user
 
-# Função para verificar se o usuário é ativo (com papel de 'user')
+# Função para verificar se o usuário é ativo (com papel de 'user' ou 'admin')
 def get_current_active_user(current_user: models.User = Depends(get_current_user)):
-    if current_user.role != "user":
+    if current_user.role != "user" and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Ação não permitida para este papel")
     return current_user
 
 # Função para verificar se o usuário é administrador (com papel de 'admin')
 def get_current_active_admin(current_user: models.User = Depends(get_current_user)):
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Ação não permitida para administradores")
+        raise HTTPException(status_code=403, detail="Ação permitida apenas para administradores")
     return current_user
