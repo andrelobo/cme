@@ -31,3 +31,9 @@ class LoginResponse(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    role: Optional[str] = None
+    password: Optional[str] = None
