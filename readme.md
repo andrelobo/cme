@@ -83,10 +83,10 @@ CME
 ---
 
 ## Funcionalidades
+- **Cadastro de usuários**: Cadastro de usuários e seus níveis de acesso (admin, tecnico, enfermagem)
 - **Cadastro de materiais**: Inserção de materiais com dados relevantes.
 - **Listagem**: Exibição de materiais cadastrados e seus detalhes.
 - **Rastreamento**: Registro de etapas e falhas associadas a materiais.
-
 
 
 ## Licença

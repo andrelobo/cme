@@ -1,10 +1,11 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Layout from './components/Layout';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import UserList from './components/UserList';
-import MaterialList from './components/MaterialList';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout";
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
+import UserList from "./components/UserList";
+import CreateUser from "./components/CreateUser";
+import MaterialList from "./components/MaterialList";
 
 const App: React.FC = () => {
   return (
@@ -14,12 +15,12 @@ const App: React.FC = () => {
           <Route path="/" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<UserList />} />
+          <Route path="/create-user" element={<CreateUser />} />
           <Route path="/materials" element={<MaterialList />} />
         </Routes>
       </Layout>
     </Router>
   );
-}
+};
 
 export default App;
-
