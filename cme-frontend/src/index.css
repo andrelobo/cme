@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-wine-700: #722F37;
+  --color-wine-800: #5E2A30;
+  --color-wine-200: #D1A7AC;
+}
+
