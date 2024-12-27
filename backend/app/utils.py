@@ -86,3 +86,44 @@ def get_current_active_admin(current_user: models.User = Depends(get_current_use
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Ação não permitida para administradores")
     return current_user
+
+def get_user_by_email(db: Session, email: str):
+    """Busca um usuário pelo email."""
+    return db.query(models.User).filter(models.User.email == email).first()
+
+def create_admin_user(db: Session):
+    """Cria o usuário administrador se não existir."""
+    admin_email = "admin@cme.com"
+    user = get_user_by_email(db, admin_email)
+    if not user:
+        admin_user = models.User(
+            name="Administrador", 
+            email=admin_email, 
+            role="admin",
+            hashed_password=get_password_hash("admin123")  # Exemplo de senha, mude conforme necessário
+        )
+        db.add(admin_user)
+        db.commit()
+        db.refresh(admin_user)
+        print("Administrador criado")
+    else:
+        print("Administrador já existe")
+
+# No ponto de inicialização, por exemplo, em main.py:
+from fastapi import FastAPI
+from app.database import SessionLocal, engine
+from app.models import Base
+
+app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
+
+@app.on_event("startup")
+def startup_event():
+    db = SessionLocal()
+    create_admin_user(db)
+    db.close()
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
